@@ -4,7 +4,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.CSVLoader;
 
-import java.io.File;
+import java.io.*;
 import java.net.URL;
 
 public class TestWekaSimple {
@@ -31,6 +31,15 @@ public class TestWekaSimple {
         }
 
         System.out.println("" + correctCount / irisData.size());
+    }
+
+    @Test
+    public void testDeSerialization() throws IOException, ClassNotFoundException {
+        URL file = Thread.currentThread().getContextClassLoader().getResource("serializedModel");
+        FileInputStream fis = new FileInputStream(file.getPath());
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        NaiveBayesUpdateable naiveBayesUpdateable = (NaiveBayesUpdateable)ois.readObject();
+        System.out.println(naiveBayesUpdateable.toString());
     }
 
 }
