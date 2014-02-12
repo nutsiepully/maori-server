@@ -9,7 +9,9 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.CSVLoader;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 
 @Controller
@@ -17,8 +19,7 @@ import java.net.URL;
 public class ModelController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/get")
-    @ResponseBody
-    public NaiveBayesUpdateable getClassifier() throws Exception {
+    public void getClassifier(HttpServletResponse httpServletResponse) throws Exception {
         URL file = Thread.currentThread().getContextClassLoader().getResource("iris.data");
 
         CSVLoader loader = new CSVLoader();
@@ -32,7 +33,8 @@ public class ModelController {
             naiveBayes.updateClassifier(instance);
         }
 
-        return naiveBayes;
+        ObjectOutputStream outputStream = new ObjectOutputStream(httpServletResponse.getOutputStream());
+        outputStream.writeObject(naiveBayes);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/test")
