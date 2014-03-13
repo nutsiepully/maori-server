@@ -20,6 +20,8 @@ public class ModelController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/get")
     public void getClassifier(HttpServletResponse httpServletResponse) throws Exception {
+        System.out.println("Serving the iris model.");
+
         URL file = Thread.currentThread().getContextClassLoader().getResource("iris.data");
 
         CSVLoader loader = new CSVLoader();
