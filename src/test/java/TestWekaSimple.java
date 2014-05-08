@@ -8,10 +8,7 @@ import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
 import weka.core.converters.ConverterUtils.DataSource;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.net.URL;
 
 public class TestWekaSimple {
@@ -86,6 +83,25 @@ public class TestWekaSimple {
         System.out.println(model.getClass().toString());
         System.out.println(model.toString());
         System.out.println(classDetailsString);
+    }
+
+    @Test
+    public void buildSimpleBarometerModel() throws Exception {
+        URL file = Thread.currentThread().getContextClassLoader().getResource("barometer_data.csv");
+
+        CSVLoader loader = new CSVLoader();
+        loader.setSource(new File(file.getPath()));
+        Instances barometerData = loader.getDataSet();
+        barometerData.setClassIndex(2);
+
+        NaiveBayesUpdateable nb = new NaiveBayesUpdateable();
+        nb.buildClassifier(barometerData);
+
+        FileOutputStream fileOutputStream = new FileOutputStream("barometer-model.model");
+        ObjectOutputStream outputStream = new ObjectOutputStream(fileOutputStream);
+        outputStream.writeObject(nb);
+        outputStream.close();
+        fileOutputStream.close();
     }
 
 }
