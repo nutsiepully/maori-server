@@ -1,22 +1,16 @@
 package io.pulkit.maori.controllers;
 
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import weka.classifiers.bayes.NaiveBayesUpdateable;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.converters.CSVLoader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.URL;
 
 @Controller
@@ -59,41 +53,44 @@ public class ModelController {
     /*
      * Get the list of all the models for the device - as JSON
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/device")
+    @RequestMapping(method = RequestMethod.GET, value = "/info")
+    @ResponseBody
     public String getModelsForDevice(@RequestParam String deviceId) {
-        throw new NotImplementedException();
+        System.out.println("Serving model info list - " + deviceId);
+
+        return "{\n" +
+                "    \"result\": [\n" +
+                "        { \"name\": \"barometer-model.model\", \"version\": \"version1\", \"active\": false },\n" +
+                "        { \"name\": \"barometer-model.model\", \"version\": \"version2\", \"active\": true },\n" +
+                "        { \"name\": \"model2\", \"version\": \"version1\", \"active\": false }\n" +
+                "    ]\n" +
+                "}";
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get")
-    public void getClassifier(HttpServletResponse httpServletResponse, @RequestParam String modelId) throws Exception {
-        System.out.println("Serving the model - " + modelId);
+    @ResponseBody
+    public String getClassifier(HttpServletResponse httpServletResponse, @RequestParam String model,
+                              @RequestParam String version) throws Exception {
+        System.out.println("Serving the model - " + model);
 
-        if (modelId == null || modelId.trim().equals("")) {
-            URL file = Thread.currentThread().getContextClassLoader().getResource("iris.data");
-
-            CSVLoader loader = new CSVLoader();
-            loader.setSource(new File(file.getPath()));
-            Instances irisData = loader.getDataSet();
-            irisData.setClassIndex(4);
-
-            NaiveBayesUpdateable naiveBayes = new NaiveBayesUpdateable();
-            naiveBayes.buildClassifier(irisData);
-            for (Instance instance : irisData) {
-                naiveBayes.updateClassifier(instance);
-            }
-
-            ObjectOutputStream outputStream = new ObjectOutputStream(httpServletResponse.getOutputStream());
-            outputStream.writeObject(naiveBayes);
-
-            return;
-        }
-
-        URL file = Thread.currentThread().getContextClassLoader().getResource(modelId);
+        // Read model file into object
+        URL file = Thread.currentThread().getContextClassLoader().getResource(model);
         FileInputStream fis = new FileInputStream(file.getPath());
         ObjectInputStream ois = new ObjectInputStream(fis);
-        Object model = ois.readObject();
-        ObjectOutputStream outputStream = new ObjectOutputStream(httpServletResponse.getOutputStream());
-        outputStream.writeObject(model);
+        Object modelObject = ois.readObject();
+
+        String result = null;
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+            objectOutputStream.writeObject(modelObject);
+            objectOutputStream.close();
+            result = new String(Base64.encode(byteArrayOutputStream.toByteArray()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/test")
