@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -95,36 +96,21 @@ public class ModelController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/test")
     @ResponseBody
-    public String get(HttpServletRequest request) throws IOException {
-        BufferedReader reader = request.getReader();
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while((line = reader.readLine()) != null) {
-            System.out.println(line);
-            sb.append(line);
+    public String uploadFile(@RequestParam MultipartFile file) throws IOException {
+        if (!file.isEmpty()) {
+            try {
+                byte[] bytes = file.getBytes();
+                BufferedOutputStream stream =
+                        new BufferedOutputStream(new FileOutputStream(new File("uploaded_file")));
+                stream.write(bytes);
+                stream.close();
+                return "You successfully uploaded file.";
+            } catch (Exception e) {
+                return "You failed to upload file." + " => " + e.getMessage();
+            }
+        } else {
+            return "You failed to upload because the file was empty.";
         }
-        return sb.toString();
-
-//        ServletInputStream inputStream = request.getInputStream();
-//        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//        byte[] buff = new byte[8192];
-//        int offset = 0; int numBytes;
-//        while (true) {
-//            numBytes = inputStream.read(buff);
-////            numBytes = inputStream.read(buff, offset, 8192);
-//            System.out.println("Num bytes : " + numBytes);
-//            if (numBytes <= 0) break;
-//            if (numBytes < 8192) {
-//                byteArrayOutputStream.write(buff, 0, numBytes);
-//                break;
-//            }
-//            byteArrayOutputStream.write(buff);
-//            offset = offset + 8192;
-//        }
-//
-//        byte[] bytes = byteArrayOutputStream.toByteArray();
-//        String s = new String(bytes);
-//        return s;
     }
 
 }
