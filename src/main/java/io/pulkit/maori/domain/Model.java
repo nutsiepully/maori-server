@@ -23,7 +23,7 @@ public class Model {
     @Column(name = "archive")
     private boolean archive;
 
-//    @Column(name = "payload")
+    @Column(name = "payload")
     private byte[] payload;
 
     public Model() {

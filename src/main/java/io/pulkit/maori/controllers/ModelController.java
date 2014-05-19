@@ -1,6 +1,9 @@
 package io.pulkit.maori.controllers;
 
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import io.pulkit.maori.domain.Model;
+import io.pulkit.maori.services.ModelService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -9,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
@@ -18,20 +20,44 @@ import java.net.URL;
 @RequestMapping(value = "/model")
 public class ModelController {
 
+    @Autowired
+    private ModelService modelService;
+
     /*
-     * Adds a model to the database. But doesn't associate it with any
-     * device.
+     * Adds a model to the database.
      */
     @RequestMapping(method = RequestMethod.POST)
-    public void addModel(HttpServletRequest httpServletRequest) {
+    @ResponseBody
+    public String addModel(@RequestParam String name, @RequestParam String version,
+                           @RequestParam MultipartFile file,
+                           @RequestParam(required = false) Boolean active,
+                           @RequestParam(required = false) Boolean archive) throws IOException {
+
+        // by default models are active and not archived.
+        active = (active == null) ? true : active;
+        archive = (archive == null) ? false : archive;
+
+        Model model = new Model(name, version, active, archive, file.getBytes());
+        modelService.addModel(model);
+
+        return "Success";
+    }
+
+    /*
+     * Activate/deactivate model
+     */
+    @RequestMapping(method = RequestMethod.PUT, value = "/activate")
+    @ResponseBody
+    public String activateModel(@RequestParam String name, @RequestParam String version, @RequestParam Boolean active) {
         throw new NotImplementedException();
     }
 
     /*
-     * Adds a model and associates it with a device.
+     * Archive/Un-archive model
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/device/add")
-    public void addModelAndAssociateDevice(HttpServletRequest httpServletRequest) {
+    @RequestMapping(method = RequestMethod.PUT, value = "/archive")
+    @ResponseBody
+    public String archiveModel(@RequestParam String name, @RequestParam String version, @RequestParam Boolean archive) {
         throw new NotImplementedException();
     }
 
@@ -39,16 +65,24 @@ public class ModelController {
      * Associate an existing model in the database with a device.
      */
     @RequestMapping(method = RequestMethod.POST, value = "/device/associate")
-    public void associateWithDevice() {
-        throw new NotImplementedException();
+    @ResponseBody
+    public String associateWithDevice(@RequestParam String name, @RequestParam String version,
+                                      @RequestParam String deviceId) {
+        modelService.attachModelToDevice(name, version, deviceId);
+
+        return "Success";
     }
 
     /*
      * Fetch a Model, given its name
      */
     @RequestMapping(method = RequestMethod.GET)
-    public void getModel(HttpServletResponse response, @RequestParam String modelName) {
-        throw new NotImplementedException();
+    @ResponseBody
+    public String getModel(@RequestParam String name, @RequestParam String version) {
+        byte[] modelPayload = modelService.getModelPayload(name, version);
+        String encodedModel = Base64.encode(modelPayload);
+
+        return encodedModel;
     }
 
     /*
