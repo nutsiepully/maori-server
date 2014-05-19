@@ -21,7 +21,6 @@ public class AllModels {
     public Model get(String name, String version) {
         Object result = DataAccessUtils.uniqueResult(dataAccessTemplate.find(
                 "select m from Model m where m.name = ? and m.version = ?",
-//                new String[] { "name", "version" }, new String[] { name, version }));
                 name, version));
 
         return (Model) result;

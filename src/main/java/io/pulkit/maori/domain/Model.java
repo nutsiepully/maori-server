@@ -84,4 +84,13 @@ public class Model {
     public void setPayload(byte[] payload) {
         this.payload = payload;
     }
+
+    @Override
+    public String toString() {
+        return "{ " +
+                "name=\"" + name + '\"' +
+                ", version=\"" + version + '\"' +
+                ", active=" + active +
+                " }";
+    }
 }

@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.URL;
+import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequestMapping(value = "/model")
@@ -91,60 +90,19 @@ public class ModelController {
     @RequestMapping(method = RequestMethod.GET, value = "/info")
     @ResponseBody
     public String getModelsForDevice(@RequestParam String deviceId) {
-        System.out.println("Serving model info list - " + deviceId);
+        List<Model> models = modelService.getModelsForDevice(deviceId);
+
+        StringBuilder sb = new StringBuilder();
+        for (Model model : models) {
+            sb.append(model.toString() + ",\n");
+        }
+        String modelInfo = sb.substring(0, sb.length() - 2);
 
         return "{\n" +
                 "    \"result\": [\n" +
-                "        { \"name\": \"barometer-model.model\", \"version\": \"version1\", \"active\": false },\n" +
-                "        { \"name\": \"barometer-model.model\", \"version\": \"version2\", \"active\": true },\n" +
-                "        { \"name\": \"model2\", \"version\": \"version1\", \"active\": false }\n" +
+                     modelInfo +
                 "    ]\n" +
                 "}";
-    }
-
-    @RequestMapping(method = RequestMethod.GET, value = "/get")
-    @ResponseBody
-    public String getClassifier(HttpServletResponse httpServletResponse, @RequestParam String model,
-                              @RequestParam String version) throws Exception {
-        System.out.println("Serving the model - " + model);
-
-        // Read model file into object
-        URL file = Thread.currentThread().getContextClassLoader().getResource(model);
-        FileInputStream fis = new FileInputStream(file.getPath());
-        ObjectInputStream ois = new ObjectInputStream(fis);
-        Object modelObject = ois.readObject();
-
-        String result = null;
-        try {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-            objectOutputStream.writeObject(modelObject);
-            objectOutputStream.close();
-            result = new String(Base64.encode(byteArrayOutputStream.toByteArray()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return result;
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/test")
-    @ResponseBody
-    public String uploadFile(@RequestParam MultipartFile file) throws IOException {
-        if (!file.isEmpty()) {
-            try {
-                byte[] bytes = file.getBytes();
-                BufferedOutputStream stream =
-                        new BufferedOutputStream(new FileOutputStream(new File("uploaded_file")));
-                stream.write(bytes);
-                stream.close();
-                return "You successfully uploaded file.";
-            } catch (Exception e) {
-                return "You failed to upload file." + " => " + e.getMessage();
-            }
-        } else {
-            return "You failed to upload because the file was empty.";
-        }
     }
 
 }
