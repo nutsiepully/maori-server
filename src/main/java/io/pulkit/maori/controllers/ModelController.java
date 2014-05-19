@@ -93,10 +93,38 @@ public class ModelController {
         return result;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/test")
+    @RequestMapping(method = RequestMethod.POST, value = "/test")
     @ResponseBody
-    public String get() {
-        return "test";
+    public String get(HttpServletRequest request) throws IOException {
+        BufferedReader reader = request.getReader();
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while((line = reader.readLine()) != null) {
+            System.out.println(line);
+            sb.append(line);
+        }
+        return sb.toString();
+
+//        ServletInputStream inputStream = request.getInputStream();
+//        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//        byte[] buff = new byte[8192];
+//        int offset = 0; int numBytes;
+//        while (true) {
+//            numBytes = inputStream.read(buff);
+////            numBytes = inputStream.read(buff, offset, 8192);
+//            System.out.println("Num bytes : " + numBytes);
+//            if (numBytes <= 0) break;
+//            if (numBytes < 8192) {
+//                byteArrayOutputStream.write(buff, 0, numBytes);
+//                break;
+//            }
+//            byteArrayOutputStream.write(buff);
+//            offset = offset + 8192;
+//        }
+//
+//        byte[] bytes = byteArrayOutputStream.toByteArray();
+//        String s = new String(bytes);
+//        return s;
     }
 
 }

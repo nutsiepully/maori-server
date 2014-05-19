@@ -10,4 +10,6 @@
     <context:annotation-config/>
 
     <context:component-scan base-package="io.pulkit.maori"/>
+
+    <import resource="classpath:applicationContext-hibernate.xml"/>
 </beans>

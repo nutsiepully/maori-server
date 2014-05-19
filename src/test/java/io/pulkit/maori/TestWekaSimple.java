@@ -1,3 +1,5 @@
+package io.pulkit.maori;
+
 import org.junit.Test;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
