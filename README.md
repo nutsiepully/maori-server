@@ -1,6 +1,3 @@
+This is the repository for the server that serves Weka models to the android client maori-client. It runs the exact same version of weka on the server so that models built on the server can seamlessly be run on the android client.
 
-curl -F "file=@src/main/resources/barometer-model.model" 'localhost:9979/maori-server/model?name=barometer&version=v2'
-
-curl -X POST 'localhost:9979/maori-server/model/device/associate?name=barometer&version=v2&deviceId=d1'
-
-curl -X GET 'localhost:9979/maori-server/model?name=barometer&version=v1'
+More info at [wiki](https://github.com/nutsiepully/maori-server/wiki)
